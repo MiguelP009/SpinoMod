@@ -23,6 +23,7 @@ int transmit_data(SoapySDRDevice *sdr, SoapySDRStream *tx_streamer, const float 
 
         printf("Sending %zu samples\n", to_send);
         num_sent = SoapySDRDevice_writeStream(sdr, tx_streamer, buffs, to_send, &flags, timeNs, 1000000);
+        printf("to send: %zu\n", to_send);
         if (num_sent < 0) {
             printf("Failed to write to stream: %d\n", (int)num_sent);
             return -1;
@@ -39,7 +40,7 @@ int transmit_data(SoapySDRDevice *sdr, SoapySDRStream *tx_streamer, const float 
     const void *buffs_end[] = {NULL};
     printf("Sending end burst signal\n");
 
-    num_sent = SoapySDRDevice_writeStream(sdr, tx_streamer, buffs_end, 0, &flags, timeNs, 1000000);
+    //num_sent = SoapySDRDevice_writeStream(sdr, tx_streamer, buffs_end, 0, &flags, timeNs, 1000000);
     if (num_sent < 0) {
         printf("Failed to send end burst signal: %d\n", (int)num_sent);
         return -1;
@@ -49,6 +50,37 @@ int transmit_data(SoapySDRDevice *sdr, SoapySDRStream *tx_streamer, const float 
 }
 
 
+int send_samples(SoapySDRDevice *sdr, SoapySDRStream *tx_streamer, const float *samples, size_t samples_len, size_t samp_per_buf) {
+    size_t total_sent = 0;
+    int flags = 0;
+    long long timeNs = 0;
+    samples_len = 500000;
+    
+    while (total_sent < samples_len) {
+        size_t to_send = (samples_len - total_sent) > samp_per_buf ? samp_per_buf : (samples_len - total_sent);
+        const void *buffs[] = {samples + total_sent};
+
+        int num_sent = SoapySDRDevice_writeStream(sdr, tx_streamer, buffs, to_send, &flags, timeNs, 1000000);
+        printf("Sent %d samples\n", num_sent);
+        if (num_sent < 0) {
+            printf("Failed to write to stream: %d\n", num_sent);
+            return -1;
+        }
+
+        total_sent += num_sent;
+    }
+
+    // Envoyer le signal de fin de transmission
+    // flags = SOAPY_SDR_END_BURST;
+    // const void *buffs_end[] = {NULL};
+    // int num_sent = SoapySDRDevice_writeStream(sdr, tx_streamer, buffs_end, 0, &flags, timeNs, 1000000);
+    // if (num_sent < 0) {
+    //     printf("Failed to send end burst signal: %d\n", num_sent);
+    //     return -1;
+    // }
+
+    return total_sent;
+}
 
 
 
@@ -145,7 +177,7 @@ int main(void)
     printf("First sample: %f, Total samples length: %zu\n", samples[0], samples_len);
 
     for (int i = 0; i < 5; i++) {
-        if (transmit_data(sdr, txStream, samples, samples_len, samp_per_buf) < 0) {
+        if (send_samples(sdr, txStream, samples, samples_len, samp_per_buf) < 0) {
             printf("Error during transmission\n");
             break;
         }
