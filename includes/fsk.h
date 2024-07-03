@@ -114,6 +114,42 @@ void interleave(float *i_out, float *q_out, float *output, int length){
     }
 }
 
+void fskModulate(s_vco *vco_config, uint8_t *input_data, size_t len_input_data, float **samples, size_t *samples_len){
+    float input_data_interpolated[LENGTH_DATA * 8 * MODULATION_INTERPOLATION];
+
+    if(repeat(input_data, len_input_data, MODULATION_INTERPOLATION, input_data_interpolated) < 0) {
+        printf("Error\n");
+        return;
+    }
+
+    float i_out[LENGTH_DATA * 8 * MODULATION_INTERPOLATION];
+    float q_out[LENGTH_DATA * 8 * MODULATION_INTERPOLATION];
+
+    vco(vco_config, input_data_interpolated, len_input_data * 8 * MODULATION_INTERPOLATION, i_out, q_out);
+
+    int rf_interpolated_length = len_input_data * 8 * MODULATION_INTERPOLATION * RF_INTERPOLATION;
+    float *i_out2 = malloc(rf_interpolated_length * sizeof(float));
+    float *q_out2 = malloc(rf_interpolated_length * sizeof(float));
+
+    repeat_f(i_out, len_input_data * 8 * MODULATION_INTERPOLATION, RF_INTERPOLATION, i_out2);
+    repeat_f(q_out, len_input_data * 8 * MODULATION_INTERPOLATION, RF_INTERPOLATION, q_out2);
+
+    *samples_len = len_input_data * 8 * MODULATION_INTERPOLATION * 2 * RF_INTERPOLATION;
+    *samples = malloc(*samples_len * sizeof(float));
+
+    if (*samples == NULL) {
+        printf("Error allocating memory for samples\n");
+        free(i_out2);
+        free(q_out2);
+        return;
+    }
+
+    interleave(i_out2, q_out2, *samples, rf_interpolated_length);
+
+    free(i_out2);
+    free(q_out2);
+}
+
 
 void transmitTestSpino(float **samples, size_t *samples_len){
     s_vco vco_config;

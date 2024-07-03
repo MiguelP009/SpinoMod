@@ -1,8 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "tcpServer.h"
-#include <uhd.h>
+
 
 #ifdef _WIN32
 #include <winsock2.h>
@@ -18,6 +17,7 @@
 
 
 #define GAIN_TX 38
+/*
 
 int usrpInit(void){//double gain, double rate, double tx_frequency) {
 
@@ -80,10 +80,11 @@ int usrpInit(void){//double gain, double rate, double tx_frequency) {
     printf("Buffer size in samples: %zu\n", samps_per_buff);
 
 }
+*/
 
 
 
-
+#define BUFFER_SIZE 1024
 
 
 int tcpSocketInit(int port) {
@@ -103,7 +104,7 @@ int tcpSocketInit(int port) {
     }
 #endif
 
-    // Créer un socket TCP
+    // Creer un socket TCP
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0) {
         perror("Erreur lors de l'ouverture du socket");
@@ -116,13 +117,13 @@ int tcpSocketInit(int port) {
     serv_addr.sin_addr.s_addr = INADDR_ANY;
     serv_addr.sin_port = htons(port);
 
-    // Lier le socket à l'adresse et au port
+    // Lier le socket a l'adresse et au port
     if (bind(sockfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0) {
         perror("Erreur lors du binding");
         exit(1);
     }
 
-    // Mettre le socket en mode écoute
+    // Mettre le socket en mode ecoute
     listen(sockfd, 5);
 
     // Accepter la connexion entrante
@@ -133,7 +134,7 @@ int tcpSocketInit(int port) {
         exit(1);
     }
 
-    // Réception des données
+    // Reception des donnees
     while (1) {
         memset(buffer, 0, BUFFER_SIZE);
         n = recv(newsockfd, buffer, BUFFER_SIZE, 0);
@@ -146,10 +147,10 @@ int tcpSocketInit(int port) {
             break;
         }
 
-        // Affichage des données reçues
+        // Affichage des donnees recues
         printf("Donnees recues: %s\n", buffer);
 
-        // Ici vous pouvez traiter les données reçues et les transmettre à votre modulation FSK
+        // Ici vous pouvez traiter les donnees recues et les transmettre a votre modulation FSK
     }
 
     // Fermeture des sockets
