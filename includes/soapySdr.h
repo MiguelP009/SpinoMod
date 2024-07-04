@@ -50,7 +50,7 @@ int selectSDRDevice(s_sdr *sdr){
     return 0;
 }
 
-int configSDR(s_sdr *sdr){
+int configSDR(s_sdr *sdr, double gain, double freq){
     size_t length;
     SoapySDRDevice *device = sdr->device;
 
@@ -78,17 +78,17 @@ int configSDR(s_sdr *sdr){
     {
         printf("setSampleRate fail: %s\n", SoapySDRDevice_lastError());
     }
-    if (SoapySDRDevice_setFrequency(device, SOAPY_SDR_TX, 0, 145.830e6, NULL) != 0)
+    if (SoapySDRDevice_setFrequency(device, SOAPY_SDR_TX, 0, freq, NULL) != 0)
     {
         printf("setFrequency fail: %s\n", SoapySDRDevice_lastError());
     }
-    if (SoapySDRDevice_setGain(device, SOAPY_SDR_TX, 0, 33))
+    if (SoapySDRDevice_setGain(device, SOAPY_SDR_TX, 0, gain))
     {
         printf("setGain fail: %s\n", SoapySDRDevice_lastError());
 
     }
-    double gain = SoapySDRDevice_getGain(device, SOAPY_SDR_TX, 0);
-    printf("Gain (dB) : %f\n", gain);
+    double gainRes = SoapySDRDevice_getGain(device, SOAPY_SDR_TX, 0);
+    printf("Gain (dB) : %f\n", gainRes);
 
 
     // Setup a stream (complex floats)

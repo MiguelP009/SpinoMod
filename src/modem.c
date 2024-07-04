@@ -1,6 +1,3 @@
-#include "../includes/modem.h"
-#include "../includes/soapySdr.h"
-
 #include <SoapySDR/Device.h>
 #include <SoapySDR/Formats.h>
 
@@ -20,7 +17,13 @@
 #include <unistd.h>
 #endif
 
+#include <getopt.h>
+
+#include "../includes/modem.h"
+#include "../includes/soapySdr.h"
 #include "../includes/fsk.h"
+#include "../includes/tcpServer.h"
+
 
 
 
@@ -44,12 +47,12 @@ void fskInit(s_vco *vco_config){
 }
 
 
-int modemInit(int *socket, int *socket2, s_vco *vco_config, s_sdr *sdr) {
+int modemInit(int *socket, int *socket2, s_vco *vco_config, s_sdr *sdr, int tcp_port, double gain, double spino_freq) {
 	if(selectSDRDevice(sdr)!=0){
 		printf("No SDR device found\n");
 		return -1;
 	}
-	if(configSDR(sdr)!=0){
+	if(configSDR(sdr, gain, spino_freq)!=0){
 		printf("Fail to configure SDR device\n");
 	}
 	printf("\n##########################################################\n");
@@ -58,7 +61,7 @@ int modemInit(int *socket, int *socket2, s_vco *vco_config, s_sdr *sdr) {
 
 	fskInit(vco_config);
 	
-	tcpSocketInit(PORT, socket, socket2);
+	tcpSocketInit(tcp_port, socket, socket2);
 	return 0;
 }
 
@@ -115,15 +118,57 @@ void getData(int socket, int socket2, s_vco *vco_config, s_sdr *sdr){
 
 }
 
-int main(){
-	int socket1, socket2;
-	s_vco vco_config;
-	s_sdr sdr;
-	if(modemInit(&socket1, &socket2, &vco_config, &sdr)!=0){
-		return -1;
-	}
+void print_usage() {
+    printf("Usage: ./SpinoMod [--gain <gain(dB)>] [--tcp_port <port>] [--spino_freq <frequency(Hz)>]\n");
+}
 
-	getData(socket1, socket2, &vco_config, &sdr);
-	return 0;
+int main(int argc, char *argv[]) {
+    int socket1, socket2;
+    s_vco vco_config;
+    s_sdr sdr;
+    
+    // Valeurs par défaut
+    int tcp_port = 8888;
+    double gain = 35.0;
+    double spino_freq = 145.83e6;
 
+    // Options de la ligne de commande
+    static struct option long_options[] = {
+        {"gain", required_argument, 0, 'g'},
+        {"tcp_port", required_argument, 0, 't'},
+        {"spino_freq", required_argument, 0, 'f'},
+        {0, 0, 0, 0}
+    };
+
+    int opt;
+    int option_index = 0;
+    
+    // Traitement des options
+    while ((opt = getopt_long(argc, argv, "g:t:f:", long_options, &option_index)) != -1) {
+        switch (opt) {
+            case 'g':
+                gain = atof(optarg);
+                break;
+            case 't':
+                tcp_port = atoi(optarg);
+                break;
+            case 'f':
+                spino_freq = atof(optarg);
+                break;
+            default:
+                print_usage();
+                return -1;
+        }
+    }
+	printf("\n################################################################################\n");
+    printf("Using parameters: gain = %.2f, tcp_port = %d, spino_freq = %.2f\n", gain, tcp_port, spino_freq);
+	printf("################################################################################\n\n");
+
+
+    if (modemInit(&socket1, &socket2, &vco_config, &sdr, tcp_port, gain, spino_freq) != 0) {
+        return -1;
+    }
+
+    getData(socket1, socket2, &vco_config, &sdr);
+    return 0;
 }

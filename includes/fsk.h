@@ -5,8 +5,7 @@
 #include <math.h>
 #include <stdint.h>
 #include <stdio.h>
-#include "testSpino.h"
-
+#include <stdlib.h>
 
 
 #define PI 3.14159265
@@ -135,57 +134,6 @@ void fskModulate(s_vco *vco_config, uint8_t *input_data, size_t len_input_data, 
     repeat_f(q_out, len_input_data * 8 * MODULATION_INTERPOLATION, RF_INTERPOLATION, q_out2);
 
     *samples_len = len_input_data * 8 * MODULATION_INTERPOLATION * 2 * RF_INTERPOLATION;
-    *samples = malloc(*samples_len * sizeof(float));
-
-    if (*samples == NULL) {
-        printf("Error allocating memory for samples\n");
-        free(i_out2);
-        free(q_out2);
-        return;
-    }
-
-    interleave(i_out2, q_out2, *samples, rf_interpolated_length);
-
-    free(i_out2);
-    free(q_out2);
-}
-
-
-void transmitTestSpino(float **samples, size_t *samples_len){
-    s_vco vco_config;
-    float center_freq = 0;
-    float deviation = 2000;
-    float vco_max = center_freq + deviation;
-    float amplitude = 1;
-    float sensitivity = 2 * PI * vco_max;
-
-    initVco(&vco_config, MODULATION_SAMPLE_RATE, sensitivity, amplitude, 0);
-
-    uint8_t input_data[LENGTH_DATA];
-    int frame_size;
-    spinoSendTC(input_data, &frame_size);
-    printf("size: %d\n", frame_size);   
-
-    float input_data_interpolated[LENGTH_DATA * 8 * MODULATION_INTERPOLATION];
-
-    if(repeat(input_data, frame_size, MODULATION_INTERPOLATION, input_data_interpolated) < 0) {
-        printf("Error\n");
-        return;
-    }
-
-    float i_out[LENGTH_DATA * 8 * MODULATION_INTERPOLATION];
-    float q_out[LENGTH_DATA * 8 * MODULATION_INTERPOLATION];
-
-    vco(&vco_config, input_data_interpolated, frame_size * 8 * MODULATION_INTERPOLATION, i_out, q_out);
-
-    int rf_interpolated_length = frame_size * 8 * MODULATION_INTERPOLATION * RF_INTERPOLATION;
-    float *i_out2 = malloc(rf_interpolated_length * sizeof(float));
-    float *q_out2 = malloc(rf_interpolated_length * sizeof(float));
-
-    repeat_f(i_out, frame_size * 8 * MODULATION_INTERPOLATION, RF_INTERPOLATION, i_out2);
-    repeat_f(q_out, frame_size * 8 * MODULATION_INTERPOLATION, RF_INTERPOLATION, q_out2);
-
-    *samples_len = frame_size * 8 * MODULATION_INTERPOLATION * 2 * RF_INTERPOLATION;
     *samples = malloc(*samples_len * sizeof(float));
 
     if (*samples == NULL) {
