@@ -39,19 +39,44 @@ SoapySDR is a vendor-neutral library that provides a common interface to various
 2. Build and install SoapySDR:
 
     ```sh
-    git clone https://github.com/pothosware/SoapyHackRF.git
-    cd SoapyHackRF
+    git clone https://github.com/pothosware/SoapySDR.git
+    cd SoapySDR
+
     mkdir build
     cd build
     cmake ..
-    make
-    sudo make install
+    make -j`nproc`
+    sudo make install -j`nproc`
+    sudo ldconfig #needed on debian systems
+    SoapySDRUtil --info
     ```
 
-3. Install the driver for your specific SDR hardware (e.g., HackRF, USRP, etc.). For example, to install the HackRF-SDR driver:
+3. Install the driver for your specific SDR hardware (e.g., HackRF, USRP, etc.) :
 
     ```sh
-    sudo apt-get install soapysdr-module-rtlsdr
+    #osmo sdr support:
+    sudo apt-get install osmo-sdr soapysdr-module-osmosdr
+
+    #rtl sdr support:
+    sudo apt-get install rtl-sdr soapysdr-module-rtlsdr
+
+    #blade rf support:
+    sudo apt-get install bladerf soapysdr-module-bladerf
+
+    #hack rf support:
+    sudo apt-get install hackrf soapysdr-module-hackrf
+
+    #usrp support:
+    sudo apt-get install uhd-host uhd-soapysdr soapysdr-module-uhd
+
+    #miri SDR support:
+    sudo apt-get install miri-sdr soapysdr-module-mirisdr
+
+    #rf space support:
+    sudo apt-get install soapysdr-module-rfspace
+
+    #airspy support:
+    sudo apt-get install airspy soapysdr-module-airspy
     ```
 
 ### SpinoMod Installation
@@ -59,7 +84,7 @@ SoapySDR is a vendor-neutral library that provides a common interface to various
 Clone the SpinoMod repository and build the project:
 
 ```sh
-git clone <repository_url>
+git clone <https://github.com/MiguelP009/SpinoMod.git>
 cd SpinoMod
 make
 ```
@@ -70,14 +95,14 @@ The SpinoMod executable accepts parameters for configuration during runtime. The
 
 ### Command-Line Options
 
-- `--gain <gain>`: Set the gain for the SDR device (default: 35.0).
+- `--gain <gain(dB)>`: Set the gain for the SDR device (default: 35.0).
 - `--tcp_port <port>`: Set the TCP port for communication (default: 8888).
-- `--spino_freq <frequency>`: Set the frequency for the SPINO communication (default: 145.83e6).
+- `--spino_freq <frequency(Hz)>`: Set the frequency for the SPINO communication (default: 145.83e6).
 
 ### Example Command
 
 ```sh
-./SpinoMod --gain 30 --tcp_port 9000 --spino_freq 144.80e6
+./SpinoMod --gain 30 --tcp_port 9999 --spino_freq 144.80e6
 ```
 
 ### Default Usage
@@ -97,25 +122,7 @@ SpinoMod is composed of several key components:
 - **Modem Initialization**: Sets up the VCO, configures the SDR device, and initializes TCP sockets.
 - **Data Reception**: Handles receiving data over TCP and processes it for transmission via the SDR.
 - **FSK Modulation**: Initializes and configures FSK modulation parameters.
-- **Command-Line Parsing**: Parses command-line arguments to configure runtime parameters.
 
-### Detailed Description
-
-#### Modem Initialization
-
-The `modemInit` function initializes the VCO, configures the SDR device, and initializes the TCP sockets. It sets the frequency, gain, and other necessary parameters for the SDR device.
-
-#### Data Reception
-
-The `getData` function handles the reception of data over a TCP connection. It receives data from the client, processes it, and transmits it using the SDR device.
-
-#### FSK Modulation
-
-FSK (Frequency Shift Keying) modulation is used for the communication process. The `fskInit` function sets up the VCO (Voltage Controlled Oscillator) with the required parameters for FSK modulation.
-
-#### Command-Line Parsing
-
-The command-line options allow the user to configure the gain, TCP port, and frequency. The `parseCommandLineOptions` function parses these arguments and sets the corresponding variables.
 
 ## Contributing
 
@@ -128,6 +135,5 @@ If you would like to contribute to SpinoMod, please follow these steps:
 
 
 ## Acknowledgements
-
 
 For more information about the SPINO project, visit the [Electrolab SPINO page](https://code.electrolab.fr/spino/).
