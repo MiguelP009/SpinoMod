@@ -82,6 +82,14 @@ int configSDR(s_sdr *sdr){
     {
         printf("setFrequency fail: %s\n", SoapySDRDevice_lastError());
     }
+    if (SoapySDRDevice_setGain(device, SOAPY_SDR_TX, 0, 33))
+    {
+        printf("setGain fail: %s\n", SoapySDRDevice_lastError());
+
+    }
+    double gain = SoapySDRDevice_getGain(device, SOAPY_SDR_TX, 0);
+    printf("Gain (dB) : %f\n", gain);
+
 
     // Setup a stream (complex floats)
     sdr->txStream = SoapySDRDevice_setupStream(device, SOAPY_SDR_TX, SOAPY_SDR_CF32, NULL, 0, NULL);

@@ -103,10 +103,9 @@ void getData(int socket, int socket2, s_vco *vco_config, s_sdr *sdr){
 
         //  Modulation FSK
 		fskModulate(vco_config, buffer, n, &samples, &samples_len);
-		//printf("sample : %.1f, %.1f\n", samples[1029], samples[1030]);
 
 		printf("FSK Modulation done\n");
-		for(int i=0; i<10; i++){
+		for(int i=0; i<5; i++){
 			transmitData3(sdr, samples, samples_len/2);
 		}
     }
