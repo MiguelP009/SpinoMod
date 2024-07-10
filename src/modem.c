@@ -109,7 +109,7 @@ void getData(int socket, int socket2, s_vco *vco_config, s_sdr *sdr){
 
 		printf("FSK Modulation done\n");
 		for(int i=0; i<2; i++){
-			transmitData3(sdr, samples, samples_len/2);
+			transmitData(sdr, samples, samples_len/2);
 		}
     }
 

@@ -84,7 +84,7 @@ SoapySDR is a vendor-neutral library that provides a common interface to various
 Clone the SpinoMod repository and build the project:
 
 ```sh
-git clone <https://github.com/MiguelP009/SpinoMod.git>
+git clone https://github.com/MiguelP009/SpinoMod.git
 cd SpinoMod
 make
 ```
