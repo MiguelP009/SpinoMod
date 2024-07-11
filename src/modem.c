@@ -19,10 +19,12 @@
 
 #include <getopt.h>
 
-#include "../includes/modem.h"
 #include "../includes/soapySdr.h"
 #include "../includes/fsk.h"
 #include "../includes/tcpServer.h"
+
+
+#define PORT 8669 // Port TCP
 
 
 
@@ -41,7 +43,6 @@ void fskInit(s_vco *vco_config){
     printf("	Frequency Deviation: %.2f Hz\n", deviation);
     printf("	Center Frequency: %.1f Hz\n", center_freq);
     printf("	Amplitude: %.2f\n", vco_config->amplitude);
-    printf("	Sensitivity: %.2f rad/s\n", vco_config->sensitivity);
 	printf("##########################################################\n");
 	
 }
@@ -54,6 +55,7 @@ int modemInit(int *socket, int *socket2, s_vco *vco_config, s_sdr *sdr, int tcp_
 	}
 	if(configSDR(sdr, gain, spino_freq)!=0){
 		printf("Fail to configure SDR device\n");
+        return -1;
 	}
 	printf("\n##########################################################\n");
 	printf("Connected to SDR Device\n");
@@ -65,16 +67,6 @@ int modemInit(int *socket, int *socket2, s_vco *vco_config, s_sdr *sdr, int tcp_
 	return 0;
 }
 
-void closeSockets(int socket, int socket2){
-#ifdef _WIN32
-    closesocket(socket);
-	closesocket(socket2);
-    WSACleanup();
-#else
-    close(socket);
-	close(socket2);
-#endif
-}
 
 void print_hex(const unsigned char *data, size_t len) {
     for (size_t i = 0; i < len; i++) {
@@ -82,6 +74,7 @@ void print_hex(const unsigned char *data, size_t len) {
     }
     printf("\n");
 }
+
 
 void getData(int socket, int socket2, s_vco *vco_config, s_sdr *sdr){
 	// Reception des donnees
@@ -166,6 +159,7 @@ int main(int argc, char *argv[]) {
 
 
     if (modemInit(&socket1, &socket2, &vco_config, &sdr, tcp_port, gain, spino_freq) != 0) {
+        printf("Error during modem initialization\n");
         return -1;
     }
 

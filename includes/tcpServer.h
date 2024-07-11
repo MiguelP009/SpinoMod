@@ -18,7 +18,7 @@
 #include <unistd.h>
 #endif
 
-#define PORT 8669  // Port sur lequel �couter
+
 #define BUFFER_SIZE 255
 
 
@@ -78,6 +78,17 @@ int tcpSocketInit(int port, int *socket_out, int *sockfd) {
 }
 
 
+
+void closeSockets(int socket, int socket2){
+#ifdef _WIN32
+    closesocket(socket);
+	closesocket(socket2);
+    WSACleanup();
+#else
+    close(socket);
+	close(socket2);
+#endif
+}
 
 
 #endif
