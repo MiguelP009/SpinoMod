@@ -1,3 +1,28 @@
+/*
+ * Author: Miguel Pradel
+ * Organization: IRISPACE
+ * Date: 2024-07-08
+ * Version: 1.0
+ *
+ * Description:
+ * This code is part of the SpinoMod application. It initializes and configures an SDR device,
+ * sets up a TCP server, and receives data to modulate using FSK (Frequency Shift Keying). 
+ *
+ * Usage:
+ * ./SpinoMod [--gain <gain(dB)>] [--tcp_port <port>] [--spino_freq <frequency(Hz)>]
+ *
+ * Example:
+ * ./SpinoMod --gain 40.0 --tcp_port 8669 --spino_freq 145830000
+ *
+ * Dependencies:
+ * - SoapySDR
+ * - Standard C libraries
+ * - Platform-specific libraries for socket communication (e.g., ws2_32.lib on Windows)
+ *
+ * Change Log:
+ * Version 1.0: [2024-07-08] - Initial version.
+ */
+
 #include <SoapySDR/Device.h>
 #include <SoapySDR/Formats.h>
 
